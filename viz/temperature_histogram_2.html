@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🌍 Data Meets Art – Températures globales (1880 → 2025)</title>
+  <title>🌍 Data Meets Art – Réchauffement global (1880 → 2025)</title>
   <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
   <style>
     body {
@@ -64,9 +64,6 @@
 
     console.log("✅ Données chargées :", labels.length, "points");
 
-    const totalFrames = labels.length;
-    const windowSize = 50;
-
     const trace = {
       x: labels.map((_, i) => i),
       y: new Array(labels.length).fill(null),
@@ -94,46 +91,40 @@
       title: {
         text: "🌍 Données NASA GISTEMP – Températures mensuelles globales",
         font: { size: 18 }
-      },
-      transition: { duration: 0 }
+      }
     };
 
     Plotly.newPlot("chart", [trace], layout, { responsive: true });
 
     let current = 0;
+    const y = new Array(labels.length).fill(null);
+    const colors = new Array(labels.length).fill("rgba(255,255,255,0)");
 
     function animateStep() {
-      const x = labels.map((_, i) => i);
-      const y = new Array(labels.length).fill(null);
-      const colors = new Array(labels.length).fill("rgba(255,255,255,0)");
+      if (current >= labels.length) return; // stop à la fin
 
-      for (let i = current; i < current + windowSize; i++) {
-        if (i < values.length) {
-          const val = values[i];
-          y[i] = val;
-          // 🔥 dégradé de couleur dynamique
-          const intensity = Math.min(1, Math.abs(val) / 2);
-          const alpha = 0.3 + 0.7 * intensity;
-          colors[i] = val >= 0
-            ? `rgba(${255 * intensity + 100}, ${80 * (1 - intensity)}, ${50}, ${alpha})`
-            : `rgba(${80}, ${150 * (1 - intensity) + 50}, ${255 * intensity + 100}, ${alpha})`;
-        }
-      }
+      const val = values[current];
+      y[current] = val;
+      const intensity = Math.min(1, Math.abs(val) / 2);
+      const alpha = 0.3 + 0.7 * intensity;
+      colors[current] = val >= 0
+        ? `rgba(${255 * intensity + 100}, ${80 * (1 - intensity)}, ${50}, ${alpha})`
+        : `rgba(${80}, ${150 * (1 - intensity) + 50}, ${255 * intensity + 100}, ${alpha})`;
 
       Plotly.animate(
         "chart",
-        { data: [{ x, y, marker: { color: colors } }] },
+        { data: [{ y, marker: { color: colors } }] },
         {
-          transition: { duration: 300, easing: "cubic-in-out" },
-          frame: { duration: 300, redraw: false }
+          transition: { duration: 50, easing: "linear" },
+          frame: { duration: 50, redraw: false }
         }
       );
 
-      current = (current + 1) % (totalFrames - windowSize);
+      current++;
     }
 
-    // 🌠 animation fluide et continue
-    setInterval(animateStep, 200);
+    // 🚀 Plus rapide : 30 ms par frame = ~60 FPS
+    setInterval(animateStep, 30);
   }
 
   window.addEventListener("load", drawHistogram);
