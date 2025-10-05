@@ -94,3 +94,21 @@ body {
 .navbar {
   animation: fadeIn 0.8s ease forwards;
 }
+
+.navbar a {
+  position: relative;
+}
+.navbar a::after {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: #8ad2ff;
+  transition: width 0.3s ease;
+}
+.navbar a:hover::after {
+  width: 100%;
+}
+
