@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>🌡️ Monthly Temperature Animation</title>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.29.1.min.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
   <style>
     body {
@@ -42,20 +42,24 @@
 
   <script>
   async function drawHistogram() {
-    const url = "https://raw.githubusercontent.com/datasets/global-temp/master/data/monthly.csv";
+    const url = "https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv";
     const response = await fetch(url);
     const text = await response.text();
     const rows = text.split("\n").slice(1);
 
     let labels = [], temps = [];
+
     for (let row of rows) {
-      const cols = row.split(",");
-      if (cols.length >= 2) {
-        const date = cols[0]; // "YYYY-MM"
-        const temp = parseFloat(cols[1]);
-        if (!isNaN(temp)) {
-          labels.push(date);
-          temps.push(temp);
+      const cols = row.trim().split(/\s+/); // sépare par espace(s)
+      if (cols.length >= 13) {
+        const year = +cols[0];
+        for (let m = 1; m <= 12; m++) {
+          const temp = parseFloat(cols[m]);
+          if (!isNaN(temp)) {
+            const monthStr = m.toString().padStart(2,'0');
+            labels.push(`${year}-${monthStr}`);
+            temps.push(temp);
+          }
         }
       }
     }
@@ -76,7 +80,7 @@
     };
 
     const layout = {
-      yaxis: { title: "Temp anomaly (°C)", range: [-1, 2] },
+      yaxis: { title: "Temp anomaly (°C)", range: [-2, 2] },
       xaxis: { title: "Month" },
       paper_bgcolor: 'rgba(0,0,0,0)',
       plot_bgcolor: 'rgba(0,0,0,0)',
@@ -85,7 +89,7 @@
 
     Plotly.newPlot('viz', [trace], layout, {responsive:true});
 
-    // Animation fenêtre glissante
+    // Animation : fenêtre glissante
     setInterval(() => {
       startIndex = (startIndex + 1) % (labels.length - windowSize);
       const xWindow = labels.slice(startIndex, startIndex + windowSize);
@@ -98,7 +102,8 @@
         transition: {duration: 200, easing: 'linear'},
         frame: {duration: 200, redraw: false}
       });
-    }, 200); // 200ms par frame
+
+    }, 200); // vitesse animation
   }
 
   drawHistogram();
