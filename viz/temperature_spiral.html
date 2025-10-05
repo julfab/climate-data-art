@@ -40,62 +40,70 @@
   <h1>🌡️ Global Warming Spiral (1880–2023)</h1>
   <div id="viz"></div>
 
-  <script>
-  async function drawSpiral() {
-    // Version simplifiée : on prend un dataset léger des anomalies de température par année
+<script>
+async function drawSpiral() {
+    console.log("🔹 Début drawSpiral()");
+
     const url = "https://raw.githubusercontent.com/datasets/global-temp/master/data/annual.csv";
+    console.log("🔹 URL du CSV :", url);
+
     const response = await fetch(url);
     const text = await response.text();
+    console.log("🔹 CSV récupéré, longueur :", text.length);
 
     const rows = text.split("\n").slice(1);
+    console.log("🔹 Nombre de lignes :", rows.length);
+
     let years = [], temps = [];
 
-    for (const row of rows) {
-      const cols = row.split(",");
-      if (cols.length >= 2) {
-        const year = +cols[0];
-        const temp = parseFloat(cols[1]);
-        if (!isNaN(year) && !isNaN(temp)) {
-          years.push(year);
-          temps.push(temp);
+    for (let i = 0; i < rows.length; i++) {
+        const cols = rows[i].split(",");
+        if (cols.length >= 2) {
+            const year = +cols[0];
+            const temp = parseFloat(cols[1]);
+            if (!isNaN(year) && !isNaN(temp)) {
+                years.push(year);
+                temps.push(temp);
+            }
         }
-      }
+        if (i < 5) console.log("🔹 Lignes exemples :", rows[i]);
     }
 
-// rayon = temp + 2 pour éviter les valeurs négatives
-const r = temps.map(t => 2 + t * 5);
+    console.log("🔹 Years:", years.slice(0,5));
+    console.log("🔹 Temps:", temps.slice(0,5));
 
-// angle = 30° par année → spirale bien étalée
-const theta = years.map(y => (y - 1880) * 30);
+    // Calcul du rayon et de l'angle
+    const r = temps.map(t => 2 + t * 5);
+    const theta = years.map(y => (y - 1880) * 30);
 
-// couleurs
-const colors = temps.map(t => t < 0 ? '#00f' : `rgb(${Math.min(255, 150 + t*100)}, 50, 50)`);
+    console.log("🔹 Rayon (r) exemple :", r.slice(0,5));
+    console.log("🔹 Angle (theta) exemple :", theta.slice(0,5));
 
-const trace = {
-  type: 'scatterpolar',
-  r: r,
-  theta: theta,
-  mode: 'lines+markers',
-  line: { color: '#ff7700', width: 2 },
-  marker: { color: colors, size: 6 },
-  hoverinfo: 'text',
-  text: years.map((y,i) => `${y}: ${temps[i].toFixed(2)}°C`)
-};
+    const colors = temps.map(t => t < 0 ? '#00f' : `rgb(${Math.min(255, 150 + t*100)}, 50, 50)`);
 
-    const layout = {
-      polar: {
-        radialaxis: { visible: false },
-        angularaxis: { visible: false }
-      },
-      paper_bgcolor: 'rgba(0,0,0,0)',
-      showlegend: false,
-      margin: { t: 0, b: 0, l: 0, r: 0 }
+    const trace = {
+        type: 'scatterpolar',
+        r: r,
+        theta: theta,
+        mode: 'lines+markers',
+        line: { color: '#ff7700', width: 2 },
+        marker: { color: colors, size: 6 },
+        hoverinfo: 'text',
+        text: years.map((y,i) => `${y}: ${temps[i].toFixed(2)}°C`)
     };
 
-    Plotly.newPlot("viz", [trace], layout, {responsive: true});
-  }
+    const layout = {
+        polar: { radialaxis: { visible: false }, angularaxis: { visible: false } },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        showlegend: false,
+        margin: { t:0, b:0, l:0, r:0 }
+    };
 
-  drawSpiral();
-  </script>
+    Plotly.newPlot("viz", [trace], layout, {responsive:true});
+    console.log("🔹 Plotly terminé");
+}
+
+drawSpiral();
+</script>
 </body>
 </html>
