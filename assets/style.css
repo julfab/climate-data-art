@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;600&family=Playfair+Display:wght@600&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: radial-gradient(ellipse at center, #0d0d0d 0%, #000 100%);
+  color: #e0e0e0;
+  text-align: center;
+}
+
+header {
+  padding: 40px 0 20px;
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5em;
+  color: #8ad2ff;
+  margin-bottom: 10px;
+}
+
+nav a {
+  color: #aaa;
+  text-decoration: none;
+  margin: 0 10px;
+}
+nav a:hover { color: #fff; }
+
+.hero {
+  background: url('earth.jpg') center/cover no-repeat;
+  padding: 120px 20px;
+  text-shadow: 0 0 10px #000;
+}
+.hero h2 {
+  font-size: 2em;
+  color: #ffffff;
+}
+.cta {
+  background: #8ad2ff;
+  color: #000;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+}
+.cta:hover {
+  background: #6ec0ff;
+}
+
+footer {
+  margin-top: 50px;
+  padding: 20px;
+  font-size: 0.9em;
+  color: #666;
+}

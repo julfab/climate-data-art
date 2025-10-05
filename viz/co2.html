@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CO₂ Emissions – Data Meets Art</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>CO₂ Emissions per Country</h1>
+    <p>Visualizing Earth's invisible exhale</p>
+    <nav><a href="../index.html">← Back to Home</a></nav>
+  </header>
+
+  <div id="viz" style="width:100%;height:90vh;"></div>
+
+  <script>
+    const data = [{
+      type: "choropleth",
+      locationmode: "ISO-3",
+      locations: ["USA", "CHN", "IND", "RUS", "BRA", "FRA"],
+      z: [15.5, 9.7, 2.3, 11.2, 2.8, 5.5],
+      text: ["United States", "China", "India", "Russia", "Brazil", "France"],
+      colorscale: "Viridis",
+      colorbar: { title: "Tonnes CO₂ per capita" }
+    }];
+
+    const layout = {
+      geo: { projection: { type: "natural earth" }, bgcolor: "rgba(0,0,0,0)" },
+      paper_bgcolor: "rgba(0,0,0,0)",
+      font: { color: "#e0e0e0" },
+      title: "Global CO₂ Emissions (Demo)"
+    };
+
+    Plotly.newPlot("viz", data, layout, {responsive: true});
+  </script>
+
+  <footer>
+    <p>Data source: Our World in Data | Visualization by Data Meets Art</p>
+  </footer>
+</body>
+</html>
