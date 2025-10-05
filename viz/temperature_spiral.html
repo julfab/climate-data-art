@@ -15,11 +15,11 @@
     }
     #viz {
       width: 100%;
-      height: 100vh;
+      height: 90vh;
     }
     h1 {
       text-align: center;
-      margin-top: 90px;
+      margin-top: 70px;
       font-weight: 500;
       letter-spacing: 1px;
       color: #a0d8ff;
@@ -42,51 +42,51 @@
 
   <script>
   async function drawSpiral() {
-    const response = await fetch("https://raw.githubusercontent.com/datasets/global-temp/master/data/monthly.csv");
+    // Version simplifiée : on prend un dataset léger des anomalies de température par année
+    const url = "https://raw.githubusercontent.com/datasets/global-temp/master/data/annual.csv";
+    const response = await fetch(url);
     const text = await response.text();
+
     const rows = text.split("\n").slice(1);
-    
-    let months = [], years = [], temps = [];
+    let years = [], temps = [];
+
     for (const row of rows) {
       const cols = row.split(",");
-      if (cols.length >= 3) {
-        const year = +cols[0].split("-")[0];
-        const month = +cols[0].split("-")[1];
+      if (cols.length >= 2) {
+        const year = +cols[0];
         const temp = parseFloat(cols[1]);
-        if (year >= 1880 && !isNaN(temp)) {
+        if (!isNaN(year) && !isNaN(temp)) {
           years.push(year);
-          months.push(month);
           temps.push(temp);
         }
       }
     }
 
-    // Convertir en coordonnées polaires
-    const r = temps.map(t => 1 + (t + 1.5));  // rayon
-    const theta = months.map((m, i) => (m / 12) * 360 + (years[i] - 1880) * 0.5); // angle
+    // coordonnées polaires : angle = année, rayon = temp + offset
+    const theta = years.map(y => (y - 1880) * 5); // écarte les années pour la spirale
+    const r = temps.map(t => 1 + t * 10); // mettre les anomalies en rayon visible
+
+    const colors = temps.map(t => t < 0 ? '#00f' : `rgb(${Math.min(255, 150 + t*50)}, 50, 50)`);
 
     const trace = {
       type: 'scatterpolar',
       r: r,
       theta: theta,
-      mode: 'lines',
-      line: {
-        color: temps.map(t => t < 0 ? '#0ff' : `rgb(${Math.min(255, 200 + t*80)}, ${100 - t*50}, 50)`),
-        width: 2
-      },
-      text: years.map(y => y.toString()),
-      hoverinfo: 'text+r',
+      mode: 'lines+markers',
+      line: { color: '#ff7700', width: 2 },
+      marker: { color: colors, size: 4 },
+      hoverinfo: 'text',
+      text: years.map((y,i) => `${y}: ${temps[i].toFixed(2)}°C`),
     };
 
     const layout = {
       polar: {
         radialaxis: { visible: false },
-        angularaxis: { visible: false },
-        bgcolor: 'rgba(0,0,0,0)'
+        angularaxis: { visible: false }
       },
       paper_bgcolor: 'rgba(0,0,0,0)',
       showlegend: false,
-      margin: { t: 0, b: 0, l: 0, r: 0 },
+      margin: { t: 0, b: 0, l: 0, r: 0 }
     };
 
     Plotly.newPlot("viz", [trace], layout, {responsive: true});
