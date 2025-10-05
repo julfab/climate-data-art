@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌍 Data Meets Art – Températures globales (1880 → 2025)</title>
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <style>
+    body {
+      background: radial-gradient(circle at center, #050505, #000);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      overflow: hidden;
+    }
+    h1 {
+      font-weight: 300;
+      margin-bottom: 5px;
+    }
+    p {
+      color: #aaa;
+      font-size: 14px;
+    }
+    #chart {
+      width: 95%;
+      height: 80vh;
+      margin: auto;
+      box-shadow: 0 0 40px rgba(0, 150, 255, 0.2);
+      border-radius: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>🌡️ L’évolution du climat depuis 1880</h1>
+  <p>Source : NASA GISTEMP – Anomalies Terre + Océan</p>
+  <div id="chart"></div>
+
+  <script>
+  async function drawHistogram() {
+    const url = "../data/GLB.Ts+dSST.csv";
+    const response = await fetch(url);
+    const text = await response.text();
+
+    const lines = text.split("\n").filter(l => /^\d{4}/.test(l));
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+    const labels = [];
+    const values = [];
+
+    for (const line of lines) {
+      const cols = line.split(",");
+      const year = parseInt(cols[0]);
+      for (let i = 1; i <= 12; i++) {
+        const val = parseFloat(cols[i]);
+        if (!isNaN(val)) {
+          labels.push(`${year}-${months[i - 1]}`);
+          values.push(val);
+        }
+      }
+    }
+
+    console.log("✅ Données chargées :", labels.length, "points");
+
+    const totalFrames = labels.length;
+    const windowSize = 50;
+
+    const trace = {
+      x: labels.map((_, i) => i),
+      y: new Array(labels.length).fill(null),
+      type: "bar",
+      marker: {
+        color: new Array(labels.length).fill("rgba(255,255,255,0)"),
+        line: { width: 0 }
+      }
+    };
+
+    const layout = {
+      paper_bgcolor: "#000",
+      plot_bgcolor: "#000",
+      font: { color: "#fff" },
+      margin: { t: 60, b: 80 },
+      yaxis: { title: "Anomalie (°C)", range: [-2, 2], gridcolor: "#222" },
+      xaxis: {
+        title: "Année",
+        range: [0, labels.length],
+        tickangle: -45,
+        tickvals: Array.from({length: 13}, (_, i) => i * 135),
+        ticktext: Array.from({length: 13}, (_, i) => 1880 + i * 12),
+        showgrid: false
+      },
+      title: {
+        text: "🌍 Données NASA GISTEMP – Températures mensuelles globales",
+        font: { size: 18 }
+      },
+      transition: { duration: 0 }
+    };
+
+    Plotly.newPlot("chart", [trace], layout, { responsive: true });
+
+    let current = 0;
+
+    function animateStep() {
+      const x = labels.map((_, i) => i);
+      const y = new Array(labels.length).fill(null);
+      const colors = new Array(labels.length).fill("rgba(255,255,255,0)");
+
+      for (let i = current; i < current + windowSize; i++) {
+        if (i < values.length) {
+          const val = values[i];
+          y[i] = val;
+          // 🔥 dégradé de couleur dynamique
+          const intensity = Math.min(1, Math.abs(val) / 2);
+          const alpha = 0.3 + 0.7 * intensity;
+          colors[i] = val >= 0
+            ? `rgba(${255 * intensity + 100}, ${80 * (1 - intensity)}, ${50}, ${alpha})`
+            : `rgba(${80}, ${150 * (1 - intensity) + 50}, ${255 * intensity + 100}, ${alpha})`;
+        }
+      }
+
+      Plotly.animate(
+        "chart",
+        { data: [{ x, y, marker: { color: colors } }] },
+        {
+          transition: { duration: 300, easing: "cubic-in-out" },
+          frame: { duration: 300, redraw: false }
+        }
+      );
+
+      current = (current + 1) % (totalFrames - windowSize);
+    }
+
+    // 🌠 animation fluide et continue
+    setInterval(animateStep, 200);
+  }
+
+  window.addEventListener("load", drawHistogram);
+  </script>
+</body>
+</html>
