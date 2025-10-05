@@ -1,87 +1,83 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🌡️ Températures mensuelles animées (NASA GISTEMP)</title>
-  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
-  <style>
-    body {
-      background: radial-gradient(circle at center, #0d1117, #000);
-      color: white;
-      font-family: 'Inter', sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 20px;
-    }
-    #chart {
-      width: 95%;
-      height: 80vh;
-      margin: auto;
-    }
-  </style>
-</head>
-<body>
-  <h1>🌡️ Global Temperature Anomalies (1880 → Aujourd’hui)</h1>
-  <p style="color: #ccc;">Source : NASA GISTEMP (Land-Ocean Temperature Index)</p>
-  <div id="chart"></div>
+<script>
+async function drawHistogram() {
+  const url = "../data/GLB.Ts+dSST.csv";
+  const response = await fetch(url);
+  const text = await response.text();
 
-  <script>
-    async function drawHistogram() {
-      const url = "../data/GLB.Ts+dSST.csv"; // adapte le chemin si besoin
-      const response = await fetch(url);
-      const text = await response.text();
+  const lines = text.split("\n").filter(l => /^\d{4}/.test(l));
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-      const lines = text.split("\n").filter(l => /^\d{4}/.test(l));
-      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const labels = [];
+  const values = [];
 
-      const labels = [];
-      const values = [];
-
-      for (const line of lines) {
-        const cols = line.split(",");
-        const year = cols[0];
-        for (let i = 1; i <= 12; i++) {
-          const val = parseFloat(cols[i]);
-          if (!isNaN(val)) {
-            labels.push(`${year}-${months[i-1]}`);
-            values.push(val);
-          }
-        }
+  for (const line of lines) {
+    const cols = line.split(",");
+    const year = cols[0];
+    for (let i = 1; i <= 12; i++) {
+      const val = parseFloat(cols[i]);
+      if (!isNaN(val)) {
+        labels.push(`${year}-${months[i - 1]}`);
+        values.push(val);
       }
-
-      console.log("✅ Données chargées:", labels.length, "points");
-
-      let windowSize = 15;
-      let current = 0;
-
-      function updatePlot() {
-        const x = labels.slice(current, current + windowSize);
-        const y = values.slice(current, current + windowSize);
-        const color = y.map(v => v >= 0 ? "rgba(255, 90, 60, 0.85)" : "rgba(80, 130, 255, 0.85)");
-
-        Plotly.react("chart", [{
-          x, y,
-          type: "bar",
-          marker: { color },
-        }], {
-          paper_bgcolor: "#0d1117",
-          plot_bgcolor: "#0d1117",
-          font: { color: "#fff" },
-          margin: { t: 60, b: 50 },
-          yaxis: { title: "Anomalie (°C)" },
-          xaxis: { title: "Date" },
-          title: { text: `🌍 Fenêtre glissante - ${x[0]} à ${x[x.length - 1]}`, font: { size: 18 } }
-        });
-
-        current = (current + 1) % (labels.length - windowSize);
-      }
-
-      updatePlot();
-      setInterval(updatePlot, 300);
     }
+  }
 
-    drawHistogram();
-  </script>
-</body>
-</html>
+  console.log("✅ Données chargées:", labels.length, "points");
+
+  // === paramètres de la fenêtre glissante ===
+  const windowSize = 50;
+  let current = 0;
+
+  // === graphique initial ===
+  const trace = {
+    x: labels.slice(0, windowSize),
+    y: values.slice(0, windowSize),
+    type: "bar",
+    marker: {
+      color: values.slice(0, windowSize).map(v =>
+        v >= 0 ? "rgba(255, 90, 60, 0.85)" : "rgba(80, 130, 255, 0.85)"
+      )
+    }
+  };
+
+  const layout = {
+    paper_bgcolor: "#0d1117",
+    plot_bgcolor: "#0d1117",
+    font: { color: "#fff" },
+    margin: { t: 60, b: 50 },
+    yaxis: { title: "Anomalie (°C)", range: [-2, 2] },
+    xaxis: {
+      title: "Date",
+      range: [labels[0], labels[labels.length - 1]], // 🌍 axe temporel fixe
+      tickangle: -45
+    },
+    title: {
+      text: `🌍 Températures mensuelles (Fenêtre de ${windowSize} mois)`,
+      font: { size: 18 }
+    }
+  };
+
+  Plotly.newPlot("chart", [trace], layout, { responsive: true });
+
+  // === animation fenêtre glissante ===
+  setInterval(() => {
+    current = (current + 1) % (labels.length - windowSize);
+    const x = labels.slice(current, current + windowSize);
+    const y = values.slice(current, current + windowSize);
+    const colors = y.map(v =>
+      v >= 0 ? "rgba(255, 90, 60, 0.85)" : "rgba(80, 130, 255, 0.85)"
+    );
+
+    Plotly.animate(
+      "chart",
+      { data: [{ x, y, marker: { color: colors } }] },
+      {
+        transition: { duration: 200, easing: "linear" },
+        frame: { duration: 200, redraw: false }
+      }
+    );
+  }, 200);
+}
+
+drawHistogram();
+</script>
