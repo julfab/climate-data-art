@@ -56,18 +56,19 @@ async function drawSpiral() {
 
     let years = [], temps = [];
 
-    for (let i = 0; i < rows.length; i++) {
-        const cols = rows[i].split(",");
-        if (cols.length >= 2) {
-            const year = +cols[0];
-            const temp = parseFloat(cols[1]);
-            if (!isNaN(year) && !isNaN(temp)) {
-                years.push(year);
-                temps.push(temp);
-            }
+ for (let i = 0; i < rows.length; i++) {
+    const cols = rows[i].split(",");
+    if (cols.length >= 3) {
+        const year = +cols[1];
+        const temp = parseFloat(cols[2]);
+        if (!isNaN(year) && !isNaN(temp)) {
+            years.push(year);
+            temps.push(temp);
         }
-        if (i < 5) console.log("🔹 Lignes exemples :", rows[i]);
     }
+    if (i < 5) console.log("🔹 Lignes exemples :", rows[i]);
+}
+
 
     console.log("🔹 Years:", years.slice(0,5));
     console.log("🔹 Temps:", temps.slice(0,5));
