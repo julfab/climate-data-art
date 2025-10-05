@@ -53,3 +53,44 @@ footer {
   font-size: 0.9em;
   color: #666;
 }
+
+/* --- NAVIGATION FIXE --- */
+
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.5);
+  padding: 12px 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  transition: background 0.3s ease;
+}
+
+.navbar a {
+  color: #ccc;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.navbar a:hover {
+  color: #8ad2ff;
+}
+
+/* Ajuste le contenu pour qu’il ne soit pas caché sous la nav */
+body {
+  padding-top: 70px;
+}
+
+/* Petite animation à l'apparition */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.navbar {
+  animation: fadeIn 0.8s ease forwards;
+}
