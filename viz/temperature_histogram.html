@@ -47,22 +47,22 @@
     const text = await response.text();
     const rows = text.split("\n").slice(1);
 
-    // Extraction des données
     let labels = [], temps = [];
     for (let row of rows) {
       const cols = row.split(",");
-      if (cols.length >= 3) {
-        const year = +cols[1];
-        const month = +cols[0].split("-")[1];
-        const temp = parseFloat(cols[2]);
-        if (!isNaN(year) && !isNaN(month) && !isNaN(temp)) {
-          labels.push(`${year}-${month.toString().padStart(2,'0')}`);
+      if (cols.length >= 2) {
+        const date = cols[0]; // "YYYY-MM"
+        const temp = parseFloat(cols[1]);
+        if (!isNaN(temp)) {
+          labels.push(date);
           temps.push(temp);
         }
       }
     }
 
-    // Paramètres de l’animation
+    console.log("Labels exemple:", labels.slice(0,5));
+    console.log("Temps exemple:", temps.slice(0,5));
+
     const windowSize = 15; // 15 mois visibles à la fois
     let startIndex = 0;
 
@@ -85,7 +85,7 @@
 
     Plotly.newPlot('viz', [trace], layout, {responsive:true});
 
-    // Animation : déplacement fenêtre
+    // Animation fenêtre glissante
     setInterval(() => {
       startIndex = (startIndex + 1) % (labels.length - windowSize);
       const xWindow = labels.slice(startIndex, startIndex + windowSize);
@@ -98,8 +98,7 @@
         transition: {duration: 200, easing: 'linear'},
         frame: {duration: 200, redraw: false}
       });
-
-    }, 200); // 200ms = vitesse animation, à ajuster si besoin
+    }, 200); // 200ms par frame
   }
 
   drawHistogram();
