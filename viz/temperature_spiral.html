@@ -62,22 +62,25 @@
       }
     }
 
-    // coordonnées polaires : angle = année, rayon = temp + offset
-    const theta = years.map(y => (y - 1880) * 5); // écarte les années pour la spirale
-    const r = temps.map(t => 1 + t * 10); // mettre les anomalies en rayon visible
+// rayon = temp + 2 pour éviter les valeurs négatives
+const r = temps.map(t => 2 + t * 5);
 
-    const colors = temps.map(t => t < 0 ? '#00f' : `rgb(${Math.min(255, 150 + t*50)}, 50, 50)`);
+// angle = 30° par année → spirale bien étalée
+const theta = years.map(y => (y - 1880) * 30);
 
-    const trace = {
-      type: 'scatterpolar',
-      r: r,
-      theta: theta,
-      mode: 'lines+markers',
-      line: { color: '#ff7700', width: 2 },
-      marker: { color: colors, size: 4 },
-      hoverinfo: 'text',
-      text: years.map((y,i) => `${y}: ${temps[i].toFixed(2)}°C`),
-    };
+// couleurs
+const colors = temps.map(t => t < 0 ? '#00f' : `rgb(${Math.min(255, 150 + t*100)}, 50, 50)`);
+
+const trace = {
+  type: 'scatterpolar',
+  r: r,
+  theta: theta,
+  mode: 'lines+markers',
+  line: { color: '#ff7700', width: 2 },
+  marker: { color: colors, size: 6 },
+  hoverinfo: 'text',
+  text: years.map((y,i) => `${y}: ${temps[i].toFixed(2)}°C`)
+};
 
     const layout = {
       polar: {
