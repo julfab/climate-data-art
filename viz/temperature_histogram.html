@@ -42,7 +42,8 @@
 
   <script>
   async function drawHistogram() {
-    const url = "https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv";
+    const url = "../data/GLB.Ts+dSST.csv";
+   
     const response = await fetch(url);
     const text = await response.text();
     const rows = text.split("\n").slice(1);
