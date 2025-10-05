@@ -12,23 +12,25 @@
       font-family: 'Inter', sans-serif;
       text-align: center;
       margin: 0;
-      padding: 20px;
-      overflow: hidden;
+      padding: 10px;
+      overflow-x: hidden;
     }
     h1 {
       font-weight: 300;
       margin-bottom: 5px;
+      font-size: 1.2rem;
     }
     p {
       color: #aaa;
-      font-size: 14px;
+      font-size: 12px;
+      margin-bottom: 10px;
     }
     #chart {
-      width: 95%;
-      height: 80vh;
+      width: 100%;
+      height: 70vh;
       margin: auto;
-      box-shadow: 0 0 40px rgba(0, 150, 255, 0.2);
-      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0, 150, 255, 0.2);
+      border-radius: 15px;
     }
   </style>
 </head>
@@ -62,8 +64,6 @@
       }
     }
 
-    console.log("✅ Données chargées :", labels.length, "points");
-
     const trace = {
       x: labels.map((_, i) => i),
       y: new Array(labels.length).fill(null),
@@ -77,20 +77,21 @@
     const layout = {
       paper_bgcolor: "#000",
       plot_bgcolor: "#000",
-      font: { color: "#fff" },
-      margin: { t: 60, b: 80 },
-      yaxis: { title: "Anomalie (°C)", range: [-2, 2], gridcolor: "#222" },
+      font: { color: "#fff", size: 10 },
+      margin: { t: 50, b: 50, l: 40, r: 20 },
+      yaxis: { title: "Anomalie (°C)", range: [-2, 2], gridcolor: "#222", titlefont: { size: 12 } },
       xaxis: {
         title: "Année",
         range: [0, labels.length],
         tickangle: -45,
-        tickvals: Array.from({length: 13}, (_, i) => i * 135),
-        ticktext: Array.from({length: 13}, (_, i) => 1880 + i * 12),
-        showgrid: false
+        tickvals: Array.from({length: 6}, (_, i) => i * 270), // moins de ticks pour mobile
+        ticktext: Array.from({length: 6}, (_, i) => 1880 + i * 24),
+        showgrid: false,
+        titlefont: { size: 12 }
       },
       title: {
         text: "🌍 Données NASA GISTEMP – Températures mensuelles globales",
-        font: { size: 18 }
+        font: { size: 14 }
       }
     };
 
@@ -101,7 +102,7 @@
     const colors = new Array(labels.length).fill("rgba(255,255,255,0)");
 
     function animateStep() {
-      if (current >= labels.length) return; // stop à la fin
+      if (current >= labels.length) return;
 
       const val = values[current];
       y[current] = val;
@@ -123,7 +124,6 @@
       current++;
     }
 
-    // 🚀 Plus rapide : 30 ms par frame = ~60 FPS
     setInterval(animateStep, 30);
   }
 
